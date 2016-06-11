@@ -78,7 +78,7 @@ class myFTP {
         sendResponse("CWD " + path);
     }
 
-    public void setPassiveMode() throws InterruptedException {
+    public void setPassiveMode() {
         try {
 
             out.println("PASV");

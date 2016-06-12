@@ -1,6 +1,8 @@
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,13 +85,12 @@ class myFTP {
 
             out.println("PASV");
             String response = in.readLine();
-            
+
             int start = response.indexOf("(");
             response = response.substring(start + 1, response.length() - 2);
 
             System.out.println(response + "dongs");
-            
-           
+
             String[] parsedIP = response.split(",");
             String IP = parsedIP[0] + "." + parsedIP[1] + "." + parsedIP[2] + "." + parsedIP[3];
             int port = (Integer.parseInt(parsedIP[4]) * 256) + Integer.parseInt(parsedIP[5]);
@@ -100,6 +101,7 @@ class myFTP {
             dataSocket = new Socket(IP, port);
             datain = new BufferedReader(new InputStreamReader(dataSocket.getInputStream()));
             dataout = new PrintWriter(dataSocket.getOutputStream(), true);
+
         } catch (IOException ex) {
             Logger.getLogger(myFTP.class.getName()).log(Level.SEVERE, null, ex);
             close();
@@ -115,7 +117,6 @@ class myFTP {
     }
 
     public void downloadFile(String file) throws IOException {
-        setPassiveMode();
         sendResponse("RETR " + file);
 
         BufferedInputStream input = new BufferedInputStream(dataSocket.getInputStream());
@@ -129,4 +130,26 @@ class myFTP {
         }
 
     }
+
+    public void uploadFile(String file) throws IOException {
+        sendResponse("REST 0");
+        sendResponse("STOR " + file);
+
+        InputStream input = new FileInputStream("D:\\test\\output");
+        BufferedOutputStream output = new BufferedOutputStream(dataSocket.getOutputStream());
+
+        byte[] buffer = new byte[4096];
+        int wrotebytes = 0;
+        int c = -1;
+        while ((c = input.read(buffer, 0, buffer.length)) != -1) {
+            output.write(buffer, 0, c);
+            output.flush();
+            
+        }
+        dataSocket.close();
+        
+        getResponse(in);
+
+    }
+
 }
